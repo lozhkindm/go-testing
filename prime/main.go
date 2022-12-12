@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -14,14 +15,14 @@ func main() {
 	doneCh := make(chan struct{})
 	defer close(doneCh)
 
-	go readUserInput(doneCh)
+	go readUserInput(os.Stdin, doneCh)
 
 	<-doneCh
 	fmt.Println("Goodbye.")
 }
 
-func readUserInput(doneCh chan struct{}) {
-	scanner := bufio.NewScanner(os.Stdin)
+func readUserInput(in io.Reader, doneCh chan struct{}) {
+	scanner := bufio.NewScanner(in)
 
 	for {
 		res, done := checkNumbers(scanner)

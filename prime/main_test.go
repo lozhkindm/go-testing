@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 	"os"
 	"strings"
@@ -96,5 +97,28 @@ func TestMain_checkNumbers(t *testing.T) {
 				t.Error("wrong quit:", quit, tt.quit)
 			}
 		})
+	}
+}
+
+func TestMain_readUserInput(t *testing.T) {
+	var buf bytes.Buffer
+
+	buf.WriteString("7\nq\n")
+	doneCh := make(chan struct{})
+	defer close(doneCh)
+
+	oldOut := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	go readUserInput(&buf, doneCh)
+	<-doneCh
+
+	_ = w.Close()
+	os.Stdout = oldOut
+
+	res, _ := io.ReadAll(r)
+	if !strings.Contains(string(res), "is a prime number.") {
+		t.Error("wrong message:", string(res))
 	}
 }
