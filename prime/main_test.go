@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"io"
+	"os"
+	"testing"
+)
 
 func TestMain_isPrime(t *testing.T) {
 	tests := []struct {
@@ -26,5 +30,20 @@ func TestMain_isPrime(t *testing.T) {
 				t.Fatal("messages are not equal:", msg, tt.msg)
 			}
 		})
+	}
+}
+
+func TestMain_prompt(t *testing.T) {
+	oldOut := os.Stdout
+	r, w, _ := os.Pipe()
+
+	os.Stdout = w
+	prompt()
+	_ = w.Close()
+	os.Stdout = oldOut
+
+	out, _ := io.ReadAll(r)
+	if string(out) != "-> " {
+		t.Error("wrong prompt:", string(out))
 	}
 }
