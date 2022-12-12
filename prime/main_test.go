@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"io"
 	"os"
 	"strings"
@@ -61,5 +62,39 @@ func TestMain_intro(t *testing.T) {
 	out, _ := io.ReadAll(r)
 	if !strings.Contains(string(out), "Enter a whole number") {
 		t.Error("wrong intro text:", string(out))
+	}
+}
+
+func TestMain_checkNumbers(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+		quit     bool
+	}{
+		{name: "empty", input: "", expected: "Please enter a whole number."},
+		{name: "zero", input: "0", expected: "0 is not prime, by definition."},
+		{name: "one", input: "1", expected: "1 is not prime, by definition."},
+		{name: "seven", input: "7", expected: "7 is a prime number."},
+		{name: "negative", input: "-2", expected: "Negative numbers are not prime, by definition."},
+		{name: "nan", input: "asd", expected: "Please enter a whole number."},
+		{name: "decimal", input: "2.5", expected: "Please enter a whole number."},
+		{name: "quit", input: "q", expected: "", quit: true},
+		{name: "Quit", input: "Q", expected: "", quit: true},
+		{name: "symbol", input: "©", expected: "Please enter a whole number."},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			scanner := bufio.NewScanner(strings.NewReader(tt.input))
+			res, quit := checkNumbers(scanner)
+
+			if !strings.EqualFold(res, tt.expected) {
+				t.Error("wrong result:", res, tt.expected)
+			}
+			if quit != tt.quit {
+				t.Error("wrong quit:", quit, tt.quit)
+			}
+		})
 	}
 }
